@@ -69,7 +69,8 @@ const TodoList = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-gray-100 p-8 flex justify-center items-center">
+    <div className="w-full max-w-md">
       <h2 className="text-3xl font-bold mb-6 text-center">Todo List</h2>
       <div className="flex flex-wrap justify-center">
         {todos.map((todo) => (
@@ -90,13 +91,13 @@ const TodoList = () => {
                 <div className="flex justify-end">
                   <button
                     onClick={() => handleSaveClick(todo._id)}
-                    className="bg-green-500 text-white py-1 px-2 rounded mr-2 transition duration-300 ease-in-out hover:bg-green-700"
+                    className="bg-green-500 todo-btn text-white py-2 px-4 rounded mr-2 transition duration-300 ease-in-out hover:bg-green-700"
                   >
                     Save
                   </button>
                   <button
                     onClick={() => setEditIndex(null)}
-                    className="bg-gray-500 text-white py-1 px-2 rounded transition duration-300 ease-in-out hover:bg-gray-700"
+                    className="bg-gray-500 text-white py-2 px-4 rounded transition duration-300 ease-in-out hover:bg-gray-700"
                   >
                     Cancel
                   </button>
@@ -108,13 +109,13 @@ const TodoList = () => {
                 <div className="flex justify-end mt-2">
                   <button
                     onClick={() => handleEditClick(todo._id, todo.text)}
-                    className="bg-blue-500 text-white py-1 px-2 rounded mr-2 transition duration-300 ease-in-out hover:bg-blue-700"
+                    className="bg-blue-500 text-white py-2 px-4 rounded mr-2 transition duration-300 ease-in-out hover:bg-blue-700"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDeleteClick(todo._id)}
-                    className="bg-red-500 text-white py-1 px-2 rounded transition duration-300 ease-in-out hover:bg-red-700"
+                    className="bg-red-500 text-white py-2 px-4 rounded transition duration-300 ease-in-out hover:bg-red-700"
                   >
                     Delete
                   </button>
@@ -125,6 +126,7 @@ const TodoList = () => {
         ))}
       </div>
     </div>
+  </div>
   );
 };
 

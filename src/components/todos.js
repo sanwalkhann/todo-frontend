@@ -1,5 +1,4 @@
-// src/Todo.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const Todo = () => {
@@ -9,6 +8,10 @@ const Todo = () => {
   const [editingIndex, setEditingIndex] = useState(null);
   const [showNoTodosButton, setShowNoTodosButton] = useState(false);
   const host = 'http://localhost:3000';
+
+  useEffect(() => {
+    fetchTodos();
+  }, []);
 
   const handleEditClick = async (index) => {
     try {
@@ -50,18 +53,23 @@ const Todo = () => {
   };
 
   const handleDeleteClick = async (id) => {
-    try {
-      const response = await fetch(`${host}/api/deletetodo/${id}`, {
-        method: 'DELETE',
-      });
+    // Display confirmation dialog before deletion
+    const confirmDeletion = window.confirm('Are you sure you want to delete this todo?');
 
-      if (response.ok) {
-        fetchTodos();
-      } else {
-        console.error('Failed to delete todo:', response.statusText);
+    if (confirmDeletion) {
+      try {
+        const response = await fetch(`${host}/api/deletetodo/${id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          fetchTodos();
+        } else {
+          console.error('Failed to delete todo:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error deleting todo:', error);
       }
-    } catch (error) {
-      console.error('Error deleting todo:', error);
     }
   };
 
@@ -91,6 +99,29 @@ const Todo = () => {
     }
   };
 
+  const handleToggleCompletion = async (id, done) => {
+    try {
+      const response = await fetch(`${host}/api/updatetodo/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          done: !done,
+        }),
+      });
+  
+      if (response.ok) {
+        fetchTodos();
+      } else {
+        console.error('Failed to update todo:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error updating todo:', error);
+    }
+  };
+  
+
   const fetchTodos = async () => {
     try {
       const response = await fetch(`${host}/api/getalltodos`);
@@ -110,7 +141,7 @@ const Todo = () => {
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
       <div className="max-w-md w-full bg-white p-8 rounded shadow-md transition-transform duration-300 transform hover:scale-105">
         <Link to="/todo-list" className="btn btn-primary">
-          Add Todo
+          Todo List
         </Link>
         <div className="mb-4 mt-4">
           <label htmlFor="todoText" className="block text-sm font-medium text-gray-600">
@@ -152,7 +183,10 @@ const Todo = () => {
           {todos.map((todo, index) => (
             <li
               key={todo._id}
-              className="flex items-center justify-between p-2 border border-gray-300 mb-2 rounded"
+              className={`flex items-center justify-between p-2 border border-gray-300 mb-2 rounded ${
+                todo.done ? 'bg-gray-100' : ''
+              }`}
+              style={{ width: '300px' }} // Set a fixed width for the todo card
             >
               {isEditing && editingIndex === index ? (
                 <input
@@ -162,7 +196,12 @@ const Todo = () => {
                   className="p-2 border border-gray-300 rounded mr-2 w-full"
                 />
               ) : (
-                <span>{todo.text}</span>
+                <span
+                  onClick={() => handleToggleCompletion(todo._id, todo.done)}
+                  style={{ cursor: 'pointer', textDecoration: todo.done ? 'line-through' : 'none' }}
+                >
+                  {todo.text}
+                </span>
               )}
               <div className="flex">
                 <button
@@ -170,12 +209,14 @@ const Todo = () => {
                   className={`${
                     isEditing ? 'bg-blue-500 hover:bg-blue-700' : 'bg-yellow-500 hover:bg-yellow-700'
                   } text-white font-bold py-1 px-2 rounded mr-2 transition-all duration-300`}
+                  style={{ backgroundColor: '#3B82F6', marginRight: '5px' }}
                 >
                   {isEditing ? 'Save' : 'Edit'}
                 </button>
                 <button
                   onClick={() => handleDeleteClick(todo._id)}
                   className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded transition-all duration-300"
+                  style={{ backgroundColor: '#EF4444' }}
                 >
                   Delete
                 </button>
