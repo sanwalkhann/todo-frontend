@@ -2,6 +2,7 @@
   "name": "todo-frontend",
   "version": "0.1.0",
   "private": true,
+  "proxy": "https://todos-app-backend-3jmq80p80-sanwals-projects.vercel.app",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",

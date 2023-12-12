@@ -1,51 +1,66 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 
-const Todo = () => {
+const TodoApp = () => {
   const [todos, setTodos] = useState([]);
   const [newTodoText, setNewTodoText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
   const [showNoTodosButton, setShowNoTodosButton] = useState(false);
-  const host = 'http://localhost:3000';
+
+  const host = 'https://todos-app-backend-nine.vercel.app';
 
   useEffect(() => {
     fetchTodos();
   }, []);
 
-  const handleEditClick = async (index) => {
+  const fetchTodos = async () => {
     try {
-      const editedTodo = todos[index];
-
-      setIsEditing(true);
-      setEditingIndex(index);
-      setNewTodoText(editedTodo.text);
+      const response = await fetch(`${host}/api/getalltodos`);
+      if (response.ok) {
+        const data = await response.json();
+        setTodos(data);
+        setShowNoTodosButton(data.length === 0);
+      } else {
+        console.error('Failed to fetch todos:', response.statusText);
+      }
     } catch (error) {
-      console.error('Error editing todo:', error);
+      console.error('Error fetching todos:', error.message);
     }
+  };
+
+  const handleEditClick = (index) => {
+    const editedTodo = todos[index];
+
+    setIsEditing(true);
+    setEditingIndex(index);
+    setNewTodoText(editedTodo.text);
   };
 
   const handleSaveClick = async () => {
     try {
-      const response = await fetch(`${host}/updatetodo/${todos[editingIndex]._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          text: newTodoText,
-          done: todos[editingIndex].done,
-        }),
-      });
+      if (editingIndex !== null && editingIndex >= 0 && editingIndex < todos.length) {
+        const response = await fetch(`${host}/api/updatetodo/${todos[editingIndex]._id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: newTodoText,
+            done: todos[editingIndex].done,
+          }),
+        });
 
-      if (response.ok) {
-        console.log('Todo updated successfully');
-        fetchTodos();
-        setIsEditing(false);
-        setEditingIndex(null);
-        setNewTodoText('');
+        if (response.ok) {
+          console.log('Todo updated successfully');
+          fetchTodos();
+          setIsEditing(false);
+          setEditingIndex(null);
+          setNewTodoText('');
+        } else {
+          console.error('Failed to update todo:', response.statusText);
+        }
       } else {
-        console.error('Failed to update todo:', response.statusText);
+        console.error('Invalid index for updating todo.');
       }
     } catch (error) {
       console.error('Error updating todo:', error);
@@ -53,7 +68,6 @@ const Todo = () => {
   };
 
   const handleDeleteClick = async (id) => {
-    // Display confirmation dialog before deletion
     const confirmDeletion = window.confirm('Are you sure you want to delete this todo?');
 
     if (confirmDeletion) {
@@ -110,7 +124,7 @@ const Todo = () => {
           done: !done,
         }),
       });
-  
+
       if (response.ok) {
         fetchTodos();
       } else {
@@ -120,30 +134,13 @@ const Todo = () => {
       console.error('Error updating todo:', error);
     }
   };
-  
-
-  const fetchTodos = async () => {
-    try {
-      const response = await fetch(`${host}/api/getalltodos`);
-      if (response.ok) {
-        const data = await response.json();
-        setTodos(data);
-        setShowNoTodosButton(data.length === 0);
-      } else {
-        console.error('Failed to fetch todos:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error fetching todos:', error.message);
-    }
-  };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
-      <div className="max-w-md w-full bg-white p-8 rounded shadow-md transition-transform duration-300 transform hover:scale-105">
-        <Link to="/todo-list" className="btn btn-primary">
-          Todo List
-        </Link>
-        <div className="mb-4 mt-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
+      <div className="w-full max-w-md bg-white p-8 rounded shadow-md transition-transform duration-300 transform hover:scale-105">
+        <h1 className="text-3xl font-bold text-center mb-4">Todo App</h1>
+
+        <div className="mb-4">
           <label htmlFor="todoText" className="block text-sm font-medium text-gray-600">
             Todo Text:
           </label>
@@ -157,6 +154,7 @@ const Todo = () => {
             />
           </div>
         </div>
+
         <div className="mb-4">
           <button
             onClick={isEditing ? handleSaveClick : handleCreateTodo}
@@ -179,7 +177,7 @@ const Todo = () => {
           </button>
         )}
 
-        <ul>
+        <ul className="flex flex-col items-center"> {/* Center the list */}
           {todos.map((todo, index) => (
             <li
               key={todo._id}
@@ -229,4 +227,4 @@ const Todo = () => {
   );
 };
 
-export default Todo;
+export default TodoApp;
